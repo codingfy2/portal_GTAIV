@@ -16,14 +16,14 @@ function NewsMetadata({ news }: { news: Materia }) {
   </p>;
 }
 
-function NewsImage({ news }: { news: Materia }) {
-  return <img src={news.imagem} alt="" width={960} height={640} />;
+function NewsImage({ news, lazy = false }: { news: Materia; lazy?: boolean }) {
+  return <img src={news.imagem} alt="" loading={lazy ? 'lazy' : undefined} width={960} height={640} />;
 }
 
-function NewsCard({ news }: { news: Materia }) {
+function NewsCard({ news, lazy = false }: { news: Materia; lazy?: boolean }) {
   return <article className="news-card">
     <a className="news-card-link" href={'/noticias.html?materia=' + encodeURIComponent(news.slug)}>
-      <NewsImage news={news} />
+      <NewsImage news={news} lazy={lazy} />
       <div className="news-card-copy">
         <span className="label">{news.categoria}</span>
         <h2>{news.titulo}</h2>
@@ -56,7 +56,12 @@ function NewsArticle({ news }: { news: Materia }) {
     <NewsImage news={news} />
     {news.texto.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
     <div className="news-article-links">
-      <a href={news.fonte}>Consultar a fonte</a>
+      {news.fontes?.length ? <section aria-labelledby="fontes-da-materia">
+        <h2 id="fontes-da-materia">Fontes</h2>
+        <ul>{news.fontes.map(source => <li key={source.url}>
+          <a href={source.url}>{source.titulo}</a>
+        </li>)}</ul>
+      </section> : <a href={news.fonte}>Consultar a fonte</a>}
       {news.guia && news.guiaTitulo && <a href={news.guia}>{news.guiaTitulo}</a>}
     </div>
   </article>;
@@ -74,7 +79,7 @@ export function NewsPage({ slug }: { slug: string | null }) {
       <div className="news-list" id="lista-noticias">
         {slug && <p>Matéria não encontrada. Veja as notícias disponíveis.</p>}
         {orderedNews.length === 0 && <p>Nenhuma notícia publicada.</p>}
-        {orderedNews.map(news => <NewsCard key={news.slug} news={news} />)}
+        {orderedNews.map(news => <NewsCard key={news.slug} news={news} lazy />)}
       </div>
     </>}
   </main>;
